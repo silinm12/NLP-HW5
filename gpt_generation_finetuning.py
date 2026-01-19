@@ -44,16 +44,14 @@ def fine_tune(train_data,save_dir, model_name_suffix):
     #3.3
     training_args = TrainingArguments(
         output_dir=os.path.join(save_dir, f"checkpoints_{model_name_suffix}"),
-        num_train_epochs=10,
+        overwrite_output_dir=True,
+        num_train_epochs=3,
         per_device_train_batch_size=4,
+        save_strategy="no",
+        eval_strategy="no",  # No evaluation set required by instructions for this part
         learning_rate=5e-5,
-        weight_decay=0.01,
-        # operational parameters
-        eval_strategy="no",
-        save_steps=500,
-        save_total_limit=1,
-        prediction_loss_only=True,
-        use_cpu=not torch.cuda.is_available()
+        use_cpu=False if device_check() == "cuda" else True,
+        logging_steps=10
     )
     #3.4
     trainer = Trainer(model=model, args=training_args,train_dataset=tokenized_dataset,data_collator=DataCollatorForLanguageModeling(tokenizer=tokenizer,mlm=False))
