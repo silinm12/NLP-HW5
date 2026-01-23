@@ -2,10 +2,13 @@ import sys
 import os
 import torch
 from datasets import load_from_disk, load_dataset
-from transformers import GPT2LMHeadModel, GPT2Tokenizer, Trainer,TrainingArguments
-from transformers import TrainingArguments
-from transformers import DataCollatorForLanguageModeling
-
+from transformers import (
+    GPT2LMHeadModel,
+    GPT2Tokenizer,
+    Trainer,
+    TrainingArguments, # Imported only once
+    DataCollatorForLanguageModeling
+)
 def load_data(path_to_subset):
     # Requirement from Part A
     if os.path.exists(path_to_subset):
@@ -50,7 +53,7 @@ def fine_tune(train_data,save_dir, model_name_suffix):
         save_strategy="no",
         eval_strategy="no",  # No evaluation set required by instructions for this part
         learning_rate=5e-5,
-        use_cpu=False if device_check() == "cuda" else True,
+        use_cpu=not torch.cuda.is_available(),
         logging_steps=10
     )
     #3.4
@@ -95,17 +98,14 @@ def fine_tune(train_data,save_dir, model_name_suffix):
     return generated_reviews
 
 if __name__ == "__main__":
-    #load imdb
-    #subset_path = sys.argv[1]
-    # dataset = load_data(subset_path)
     if len(sys.argv) < 4:
         subset_path = "imdb_subset"
         output_file_path = "generated_reviews.txt"
         save_dir = "models_cache"
     else:
         subset_path = sys.argv[1]
-        save_dir = sys.argv[2]  # NOTE: PDF order might vary, check instructions
-        output_file_path = sys.argv[3]
+        output_file_path = sys.argv[2]
+        save_dir = sys.argv[3]
 
     dataset = load_data(subset_path)
     #dataset = load_from_disk("imdb")
